@@ -1,0 +1,16 @@
+CREATE EXTERNAL TABLE dbo.staging_station (
+    [Station_Id] NVARCHAR(4000),
+    [Name] NVARCHAR(4000),
+    [Latitude] FLOAT,
+    [Longitude] FLOAT
+)
+WITH (
+    LOCATION = 'public.station.txt',   
+    DATA_SOURCE = [abhijeetproject123],     
+    FILE_FORMAT = [SynapseDelimitedTextFormat],
+    REJECT_TYPE = VALUE,
+    REJECT_VALUE = 0
+);
+GO
+
+select top 10* from dbo.staging_station;

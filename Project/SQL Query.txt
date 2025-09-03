@@ -1,0 +1,7 @@
+SELECT COUNT(1) AS COUNT, 'dimpayment' AS Table_name FROM dbo.dimpayment
+UNION
+SELECT COUNT(1) AS COUNT, 'dimrider' AS Table_name FROM dbo.dimrider
+UNION
+SELECT COUNT(1) AS COUNT, 'dimstation' AS Table_name FROM dbo.dimstation
+UNION
+SELECT COUNT(1) AS COUNT, 'facttrip' AS Table_name FROM dbo.facttrip

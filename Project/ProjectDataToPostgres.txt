@@ -1,0 +1,110 @@
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+host = "abproject.postgres.database.azure.com"
+user = "postgress89"  
+password = "udacity@123"
+sslmode = "require"
+
+dbname = "postgres"
+conn_string = f"host={host} user={user} dbname={dbname} password={password} sslmode={sslmode}"
+conn = psycopg2.connect(conn_string)
+conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+print("Connection established to default DB")
+
+cursor = conn.cursor()
+cursor.execute("DROP DATABASE IF EXISTS udacityproject")
+cursor.execute("CREATE DATABASE udacityproject")
+conn.commit()
+cursor.close()
+conn.close()
+
+dbname = "udacityproject"
+conn_string = f"host={host} user={user} dbname={dbname} password={password} sslmode={sslmode}"
+conn = psycopg2.connect(conn_string)
+print("Connection established to udacityproject")
+cursor = conn.cursor()
+
+def drop_recreate(c, tablename, create):
+    c.execute(f"DROP TABLE IF EXISTS {tablename};")
+    c.execute(create)
+    print(f"Finished creating table {tablename}")
+
+def populate_table(c, filename, tablename):
+    try:
+        with open(filename, 'r') as f:
+            # use cursor.copy_expert for better CSV handling
+            copy_sql = f"COPY {tablename} FROM STDIN WITH CSV HEADER DELIMITER ',' NULL ''"
+            c.copy_expert(sql=copy_sql, file=f)
+        conn.commit()
+        print(f"Finished populating {tablename}")
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(f"Error populating {tablename}: {error}")
+        conn.rollback()
+        c.close()
+
+
+table = "rider"
+filename = './data/riders.csv'
+create = """
+CREATE TABLE rider (
+    rider_id INTEGER PRIMARY KEY,
+    first VARCHAR(50),
+    last VARCHAR(50),
+    address VARCHAR(100),
+    birthday DATE,
+    account_start_date DATE,
+    account_end_date DATE,
+    is_member BOOLEAN
+);
+"""
+drop_recreate(cursor, table, create)
+populate_table(cursor, filename, table)
+
+table = "payment"
+filename = './data/payments.csv'
+create = """
+CREATE TABLE payment (
+    payment_id INTEGER PRIMARY KEY,
+    date DATE,
+    amount NUMERIC(10,2),
+    rider_id INTEGER
+);
+"""
+drop_recreate(cursor, table, create)
+populate_table(cursor, filename, table)
+
+table = "station"
+filename = './data/stations.csv'
+create = """
+CREATE TABLE station (
+    station_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(75),
+    latitude FLOAT,
+    longitude FLOAT
+);
+"""
+drop_recreate(cursor, table, create)
+populate_table(cursor, filename, table)
+
+table = "trip"
+filename = './data/trips.csv'
+create = """
+CREATE TABLE trip (
+    trip_id VARCHAR(50) PRIMARY KEY,
+    rideable_type VARCHAR(75),
+    start_at TIMESTAMP,
+    ended_at TIMESTAMP,
+    start_station_id VARCHAR(50),
+    end_station_id VARCHAR(50),
+    rider_id INTEGER
+);
+"""
+drop_recreate(cursor, table, create)
+populate_table(cursor, filename, table)
+
+conn.commit()
+cursor.close()
+conn.close()
+
+print("All done!")

@@ -1,0 +1,14 @@
+CREATE EXTERNAL TABLE dbo.staging_payment (
+    [PaymentID] BIGINT,
+    [PaymentDate] VARCHAR(50),
+    [Amount] FLOAT,
+    [AccountNumber] BIGINT
+)
+WITH (
+    LOCATION = 'public.payment.txt',   
+    DATA_SOURCE =[abhijeetproject123] ,     
+    FILE_FORMAT = [SynapseDelimitedTextFormat],
+    REJECT_TYPE = VALUE,
+    REJECT_VALUE = 0
+);
+GO

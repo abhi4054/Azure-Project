@@ -1,0 +1,20 @@
+CREATE EXTERNAL TABLE dbo.staging_rider (
+    [Rider_Id] BIGINT,
+    [Address] NVARCHAR(4000),
+    [First_Name] NVARCHAR(4000),
+    [Last_Name] NVARCHAR(4000),
+    [Birthday] VARCHAR(50),
+    [Account_start_date] VARCHAR(50),
+    [Account_end_date] VARCHAR(50),
+    [Is_member] BIT
+)
+WITH (
+    LOCATION = 'public.rider.txt',  
+    DATA_SOURCE = [abhijeetproject123],   
+    FILE_FORMAT = [SynapseDelimitedTextFormat],
+    REJECT_TYPE = VALUE,
+    REJECT_VALUE = 0
+);
+GO
+
+select Top 10* from dbo.staging_rider;

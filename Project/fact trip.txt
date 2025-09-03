@@ -1,0 +1,44 @@
+
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Abhijeet';
+GO
+
+CREATE DATABASE SCOPED CREDENTIAL [abhijeetproject123]
+WITH IDENTITY = 'SHARED ACCESS SIGNATURE',
+SECRET = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2025-09-02T01:21:23Z&st=2025-09-01T17:06:23Z&spr=https&sig=2dttWbgb7friqECuJQB2woa4VZUVN%2FEDT4PcfhZf%2Fc8%3D';
+GO
+
+CREATE EXTERNAL DATA SOURCE [abhijeetproject123_dls]
+WITH (
+    LOCATION = 'abfss://abproject@abhijeetproject123storage.dfs.core.windows.net/',
+    CREDENTIAL = [abhijeetproject123]
+);
+GO
+CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat]
+WITH (
+    FORMAT_TYPE = DELIMITEDTEXT,
+    FORMAT_OPTIONS (
+        FIELD_TERMINATOR = ',',
+        STRING_DELIMITER = '"',
+        FIRST_ROW = 2
+    )
+);
+GO
+CREATE EXTERNAL TABLE dbo.staging_trip (
+    [Trip_Id] NVARCHAR(4000),
+    [rideable_type] NVARCHAR(4000),
+    [Started_At] VARCHAR(50),
+    [Ended_At] VARCHAR(50),
+    [Start_Station_Id] NVARCHAR(4000),
+    [End_Station_Id] NVARCHAR(4000),
+    [Member_Id] BIGINT
+)
+WITH (
+    LOCATION = 'public.trip.csv',   
+    DATA_SOURCE = [abhijeetproject_dls], 
+    FILE_FORMAT = [SynapseDelimitedTextFormat],
+    REJECT_TYPE = VALUE,
+    REJECT_VALUE = 0
+);
+GO
+
+SELECT TOP 100 * FROM dbo.staging_trip;
